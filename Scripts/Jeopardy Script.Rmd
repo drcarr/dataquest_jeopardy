@@ -166,3 +166,24 @@ chisq.test(shakespeare_obs, p = p_expected)
 ```
 
 History and Shakespeare both also have p-values well under 0.05, so just like with science we are going to reject the null hypothesis for these categories as well.
+
+## Repeated Questions
+
+Given the sheer volume of questions on Jeopardy, its likely there are going to be some repeats, so our next step is going to be trying to identify those. We can't just search for duplicates in the questions list because any subtle wording change wouldn't be caught even if what the question was actually asking was the same. Instead, we'll filter out any short and connecting words and count up what the most commonly used words are in the questions.
+
+```{r}
+questions <- pull(jeopardy, question)
+terms_used <- character(0)
+
+for (q in questions) {
+  # Split sentence into distinct words
+  split_sentence <- str_split(q, " ")[[1]]
+  
+  # Remove words shorter than 6 characters or that are already in the vector
+  for (term in split_sentence) {
+    if(!term %in% terms_used & nchar(term) >=6) {
+      terms_used <- c(terms_used, term)
+    }
+  }
+}
+```

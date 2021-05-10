@@ -266,6 +266,84 @@ pre code {
 <pre class="r"><code>length(unique(jeopardy$category))</code></pre>
 <pre><code>## [1] 3369</code></pre>
 <p>Looks like there are 3,369 unique categories. That means that, if there was no category more frequent than the others, we’d expect the odds of encountering any one category to be <span class="math inline">\(\frac{1}{3369}\)</span> (and on the flip side, the odds of <em>not</em> encountering a specific category to be <span class="math inline">\(\frac{3368}{3369}\)</span>).</p>
+<p>we’re going to run an hypothesis test on the categories to determine if science, history, and Shakespeare are in fact over-representing in the data set, so we need to establish our baseline hypotheses. Our null hypothesis <span class="math inline">\(H_{0}\)</span> will be that there is no increased prevalence of any one category in the data set, or in other words all categories have the same odds of <span class="math inline">\(\frac{1}{3369}\)</span>, meaning our alternative hypothesis is that the categories are not evenly distributied and thus the odds of encountering any one of our highlighted categories is in fact greater than <span class="math inline">\(\frac{1}{3369}\)</span>.</p>
+<p>This looks like it’s going to be a <strong>chi-squared test</strong>, so let’s set up our baseline proportions as variables to make this easier to run.</p>
+<pre class="r"><code>n_questions &lt;- nrow(jeopardy)
+p_category_expected &lt;- 1/3369
+p_not_category_expected &lt;- 3368/3369
+p_expected &lt;- c(p_category_expected, p_not_category_expected)</code></pre>
+<pre class="r"><code>categories &lt;- pull(jeopardy, category)
+n_science &lt;- 0
+
+# Count how many times the word &quot;science&quot; appears in the categories
+for (c in categories) {
+  if (&quot;science&quot; %in% c) {
+    n_science &lt;- n_science + 1
+  }
+}
+
+# Run chi-sq test
+science_obs &lt;- c(n_science, n_questions - n_science)
+chisq.test(science_obs, p = p_expected)</code></pre>
+<pre><code>## 
+##  Chi-squared test for given probabilities
+## 
+## data:  science_obs
+## X-squared = 145.77, df = 1, p-value &lt; 2.2e-16</code></pre>
+<p>That is an extremely small p-value, well under the threshold level of 0.05. Therefore we are going to reject the null hypothesis and say that the evidence does not support the conclusion that science has an equal liklihood to appear as all other categories. Let’s check history and Shakespeare next.</p>
+<pre class="r"><code>n_history &lt;- 0
+
+# Count how many times the word &quot;science&quot; appears in the categories
+for (c in categories) {
+  if (&quot;history&quot; %in% c) {
+    n_history &lt;- n_history + 1
+  }
+}
+
+# Run chi-sq test
+history_obs &lt;- c(n_history, n_questions - n_history)
+chisq.test(history_obs, p = p_expected)</code></pre>
+<pre><code>## 
+##  Chi-squared test for given probabilities
+## 
+## data:  history_obs
+## X-squared = 200.04, df = 1, p-value &lt; 2.2e-16</code></pre>
+<pre class="r"><code>n_shakespeare &lt;- 0
+
+# Count how many times the word &quot;science&quot; appears in the categories
+for (c in categories) {
+  if (&quot;shakespeare&quot; %in% c) {
+    n_shakespeare &lt;- n_shakespeare + 1
+  }
+}
+
+# Run chi-sq test
+shakespeare_obs &lt;- c(n_shakespeare, n_questions - n_shakespeare)
+chisq.test(shakespeare_obs, p = p_expected)</code></pre>
+<pre><code>## 
+##  Chi-squared test for given probabilities
+## 
+## data:  shakespeare_obs
+## X-squared = 34.381, df = 1, p-value = 4.53e-09</code></pre>
+<p>History and Shakespeare both also have p-values well under 0.05, so just like with science we are going to reject the null hypothesis for these categories as well.</p>
+</div>
+<div id="repeated-questions" class="section level2">
+<h2>Repeated Questions</h2>
+<p>Given the sheer volume of questions on Jeopardy, its likely there are going to be some repeats, so our next step is going to be trying to identify those. We can’t just search for duplicates in the questions list because any subtle wording change wouldn’t be caught even if what the question was actually asking was the same. Instead, we’ll filter out any short and connecting words and count up what the most commonly used words are in the questions.</p>
+<pre class="r"><code>questions &lt;- pull(jeopardy, question)
+terms_used &lt;- character(0)
+
+for (q in questions) {
+  # Split sentence into distinct words
+  split_sentence &lt;- str_split(q, &quot; &quot;)[[1]]
+  
+  # Remove words shorter than 6 characters or that are already in the vector
+  for (term in split_sentence) {
+    if(!term %in% terms_used &amp; nchar(term) &gt;=6) {
+      terms_used &lt;- c(terms_used, term)
+    }
+  }
+}</code></pre>
 </div>
 
 
