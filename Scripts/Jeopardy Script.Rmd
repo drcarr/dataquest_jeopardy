@@ -1,0 +1,40 @@
+---
+title: "Dataquest Jeopardy! Project"
+author: "Douglas Carr"
+date: "5/9/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Project Purpose
+
+The purpose of this project is to use data regarding Jeopary! show questions to determine the optimal categories to study to provide the best chance of success if you appear on the show.  We will do this by examining a data set of 20,000 questions from Jeopardy! episodes and attempting to discern any pattern regarding question categories.
+
+## Data Import
+
+```{r}
+jeopardy <- read_csv("https://query.data.world/s/gb5qjrgib6gg3dz24udelbh7jqmpjt")
+```
+
+Now that the data is loaded, let's examine the first few rows of the dataset plus the column names list to plot out our next steps.
+
+```{r}
+head(jeopardy, 5)
+colnames(jeopardy)
+```
+
+The column names are decidedly un-tidy, so let's use the `janitor` package to clean that up!
+
+```{r include=FALSE}
+library(janitor)
+```
+
+```{r}
+jeopardy <- jeopardy %>%
+  janitor::clean_names()
+```
+
