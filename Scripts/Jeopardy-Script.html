@@ -202,9 +202,51 @@ pre code {
 <pre class="r"><code>colnames(jeopardy)</code></pre>
 <pre><code>## [1] &quot;Show Number&quot; &quot;Air Date&quot;    &quot;Round&quot;       &quot;Category&quot;    &quot;Value&quot;      
 ## [6] &quot;Question&quot;    &quot;Answer&quot;</code></pre>
+</div>
+<div id="data-prep" class="section level2">
+<h2>Data Prep</h2>
 <p>The column names are decidedly un-tidy, so let’s use the <code>janitor</code> package to clean that up!</p>
 <pre class="r"><code>jeopardy &lt;- jeopardy %&gt;%
   janitor::clean_names()</code></pre>
+<p>Now that we’ve got our column names nice and tidy, we need to fix the value column to be numeric rather than character. The presence of the dollar sign ($) is throwing us off, so let’s get rid of it in order to convert the column. We also want to get rid of the questions with “None” as a value, as they won’t work in our later analysis.</p>
+<pre class="r"><code>jeopardy &lt;- jeopardy %&gt;%
+  filter(value != &quot;None&quot;) %&gt;%
+  mutate(
+    value = str_replace_all(.$value, &quot;[$,]&quot;, &quot;&quot;),
+    value = as.numeric(value)
+  )</code></pre>
+<p>Now let’s quickly check to see if that did the trick.</p>
+<pre class="r"><code>sort(unique(jeopardy$value))</code></pre>
+<pre><code>##  [1]   100   200   300   367   400   500   600   700   750   800   900  1000
+## [13]  1020  1100  1111  1200  1300  1400  1492  1500  1600  1700  1800  1900
+## [25]  2000  2021  2100  2127  2200  2300  2400  2500  2600  2800  2900  3000
+## [37]  3100  3200  3300  3389  3400  3500  3600  3800  3900  4000  4100  4400
+## [49]  4500  4600  4700  4800  5000  5200  5400  5600  5800  6000  6100  6200
+## [61]  6800  7000  7200  7400  7500  8000  8200  9000 10000 10800 12000</code></pre>
+<pre class="r"><code>typeof(jeopardy$value)</code></pre>
+<pre><code>## [1] &quot;double&quot;</code></pre>
+<p>Looking good!</p>
+</div>
+<div id="text-normalization" class="section level2">
+<h2>Text Normalization</h2>
+<p>Text data can be messy to work with in the way we want to, so next we need to perform some normalization steps to make sure everything is set up the way we need it for our analysis. Specifically, we want to convert everything to lower case and then remove all punctuation marks, and we need to do this on <code>question</code>, <code>answer</code>, and <code>category</code>.</p>
+<pre class="r"><code>jeopardy &lt;- jeopardy %&gt;%
+  mutate(
+    question = tolower(question),
+    question = str_remove_all(question, &quot;[^A-Za-z0-9 ]&quot;),
+    answer = tolower(answer),
+    answer = str_remove_all(answer, &quot;[^A-Za-z0-9 ]&quot;),
+    category = tolower(category),
+    category = str_remove_all(category, &quot;[^A-Za-z0-9 ]&quot;)
+  )</code></pre>
+<p>We also want to separate the <code>air_date</code> column out into its constituent parts and create <code>year</code>, <code>month</code>, and <code>day</code> columns.</p>
+<pre class="r"><code>jeopardy &lt;- jeopardy %&gt;%
+  separate(air_date, into = c(&quot;year&quot;, &quot;month&quot;, &quot;day&quot;), sep = &quot;-&quot;) %&gt;%
+  mutate(
+    year = as.numeric(year),
+    month = as.numeric(month),
+    day = as.numeric(day)
+  )</code></pre>
 </div>
 
 

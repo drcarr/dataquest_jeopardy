@@ -87,3 +87,11 @@ jeopardy <- jeopardy %>%
     day = as.numeric(day)
   )
 ```
+
+Once more let's take a quick look to see if our data is looking like we expect it to.
+
+```{r}
+head(jeopardy)
+```
+
+Great! Moving along then.
