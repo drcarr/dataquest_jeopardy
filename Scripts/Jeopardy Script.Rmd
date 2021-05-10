@@ -27,6 +27,8 @@ head(jeopardy, 5)
 colnames(jeopardy)
 ```
 
+## Data Prep
+
 The column names are decidedly un-tidy, so let's use the `janitor` package to clean that up!
 
 ```{r include=FALSE}
@@ -38,3 +40,50 @@ jeopardy <- jeopardy %>%
   janitor::clean_names()
 ```
 
+Now that we've got our column names nice and tidy, we need to fix the value column to be numeric rather than character. The presence of the dollar sign ($) is throwing us off, so let's get rid of it in order to convert the column. We also want to get rid of the questions with "None" as a value, as they won't work in our later analysis.
+
+```{r}
+jeopardy <- jeopardy %>%
+  filter(value != "None") %>%
+  mutate(
+    value = str_replace_all(.$value, "[$,]", ""),
+    value = as.numeric(value)
+  )
+```
+
+Now let's quickly check to see if that did the trick.
+
+```{r}
+sort(unique(jeopardy$value))
+typeof(jeopardy$value)
+```
+
+Looking good!
+
+## Text Normalization
+
+Text data can be messy to work with in the way we want to, so next we need to perform some normalization steps to make sure everything is set up the way we need it for our analysis. Specifically, we want to convert everything to lower case and then remove all punctuation marks, and we need to do this on `question`, `answer`, and `category`.
+
+```{r}
+jeopardy <- jeopardy %>%
+  mutate(
+    question = tolower(question),
+    question = str_remove_all(question, "[^A-Za-z0-9 ]"),
+    answer = tolower(answer),
+    answer = str_remove_all(answer, "[^A-Za-z0-9 ]"),
+    category = tolower(category),
+    category = str_remove_all(category, "[^A-Za-z0-9 ]")
+  )
+```
+
+We also want to separate the `air_date` column out into its constituent parts and create `year`, `month`, and `day` columns.
+
+```{r}
+jeopardy <- jeopardy %>%
+  separate(air_date, into = c("year", "month", "day"), sep = "-") %>%
+  mutate(
+    year = as.numeric(year),
+    month = as.numeric(month),
+    day = as.numeric(day)
+  )
+```
