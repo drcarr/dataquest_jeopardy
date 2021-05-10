@@ -95,3 +95,74 @@ head(jeopardy)
 ```
 
 Great! Moving along then.
+
+## Focus on Categories
+
+Now it's time to find out what categories we want to focus our attention on to. Anecdotally, it seems like science, history, and Shakespeare are more common on the show, so let's focus on them. First we need to find out how many unique categories we have in our data set.
+
+```{r}
+length(unique(jeopardy$category))
+```
+
+Looks like there are 3,369 unique categories. That means that, if there was no category more frequent than the others, we'd expect the odds of encountering any one category to be $\frac{1}{3369}$ (and on the flip side, the odds of *not* encountering a specific category to be $\frac{3368}{3369}$).
+
+we're going to run an hypothesis test on the categories to determine if science, history, and Shakespeare are in fact over-representing in the data set, so we need to establish our baseline hypotheses. Our null hypothesis $H_{0}$ will be that there is no increased prevalence of any one category in the data set, or in other words all categories have the same odds of $\frac{1}{3369}$, meaning our alternative hypothesis is that the categories are not evenly distributied and thus the odds of encountering any one of our highlighted categories is in fact greater than $\frac{1}{3369}$.
+
+This looks like it's going to be a **chi-squared test**, so let's set up our baseline proportions as variables to make this easier to run.
+
+```{r}
+n_questions <- nrow(jeopardy)
+p_category_expected <- 1/3369
+p_not_category_expected <- 3368/3369
+p_expected <- c(p_category_expected, p_not_category_expected)
+```
+
+```{r}
+categories <- pull(jeopardy, category)
+n_science <- 0
+
+# Count how many times the word "science" appears in the categories
+for (c in categories) {
+  if ("science" %in% c) {
+    n_science <- n_science + 1
+  }
+}
+
+# Run chi-sq test
+science_obs <- c(n_science, n_questions - n_science)
+chisq.test(science_obs, p = p_expected)
+```
+
+That is an extremely small p-value, well under the threshold level of 0.05. Therefore we are going to reject the null hypothesis and say that the evidence does not support the conclusion that science has an equal liklihood to appear as all other categories. Let's check history and Shakespeare next.
+
+```{r}
+n_history <- 0
+
+# Count how many times the word "science" appears in the categories
+for (c in categories) {
+  if ("history" %in% c) {
+    n_history <- n_history + 1
+  }
+}
+
+# Run chi-sq test
+history_obs <- c(n_history, n_questions - n_history)
+chisq.test(history_obs, p = p_expected)
+```
+
+```{r}
+n_shakespeare <- 0
+
+# Count how many times the word "science" appears in the categories
+for (c in categories) {
+  if ("shakespeare" %in% c) {
+    n_shakespeare <- n_shakespeare + 1
+  }
+}
+
+# Run chi-sq test
+shakespeare_obs <- c(n_shakespeare, n_questions - n_shakespeare)
+chisq.test(shakespeare_obs, p = p_expected)
+```
+
+History and Shakespeare both also have p-values well under 0.05, so just like with science we are going to reject the null hypothesis for these categories as well.

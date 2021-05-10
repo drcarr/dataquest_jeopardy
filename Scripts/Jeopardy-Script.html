@@ -247,6 +247,25 @@ pre code {
     month = as.numeric(month),
     day = as.numeric(day)
   )</code></pre>
+<p>Once more let’s take a quick look to see if our data is looking like we expect it to.</p>
+<pre class="r"><code>head(jeopardy)</code></pre>
+<pre><code>## # A tibble: 6 x 9
+##   show_number  year month   day round  category    value question         answer
+##         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;            &lt;chr&gt; 
+## 1        4680  2004    12    31 Jeopa~ history       200 for the last 8 ~ coper~
+## 2        4680  2004    12    31 Jeopa~ espns top ~   200 no 2 1912 olymp~ jim t~
+## 3        4680  2004    12    31 Jeopa~ everybody ~   200 the city of yum~ arizo~
+## 4        4680  2004    12    31 Jeopa~ the compan~   200 in 1963 live on~ mcdon~
+## 5        4680  2004    12    31 Jeopa~ epitaphs  ~   200 signer of the d~ john ~
+## 6        4680  2004    12    31 Jeopa~ 3letter wo~   200 in the title of~ the a~</code></pre>
+<p>Great! Moving along then.</p>
+</div>
+<div id="focus-on-categories" class="section level2">
+<h2>Focus on Categories</h2>
+<p>Now it’s time to find out what categories we want to focus our attention on to. Anecdotally, it seems like science, history, and Shakespeare are more common on the show, so let’s focus on them. First we need to find out how many unique categories we have in our data set.</p>
+<pre class="r"><code>length(unique(jeopardy$category))</code></pre>
+<pre><code>## [1] 3369</code></pre>
+<p>Looks like there are 3,369 unique categories. That means that, if there was no category more frequent than the others, we’d expect the odds of encountering any one category to be <span class="math inline">\(\frac{1}{3369}\)</span> (and on the flip side, the odds of <em>not</em> encountering a specific category to be <span class="math inline">\(\frac{3368}{3369}\)</span>).</p>
 </div>
 
 
